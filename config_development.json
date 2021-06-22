@@ -1,0 +1,12 @@
+﻿{
+  "from": "info.nviera@gmail.com",
+  "smtpOptions": {
+    "host": "smtp.googlemail.com",
+    "port": 465,
+    "secure": true,
+    "auth": {
+      "user": "info.nviera@gmail.com",
+      "pass": "Nviera@123"
+    }
+  }
+}

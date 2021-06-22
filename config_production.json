@@ -1,0 +1,12 @@
+﻿{
+  "from": "no-reply@healthx.global",
+  "smtpOptions": {
+    "host": "smtp.office365.com",
+    "port": 587,
+    "auth": {
+      "user": "sales@healthx.global",
+      "pass": "India1234!"
+    },
+    "tls": { "rejectUnauthorized": false }
+  }
+}

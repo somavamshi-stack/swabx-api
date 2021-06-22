@@ -1,0 +1,46 @@
+version: '3.9'
+services:
+    mariadb:
+        image: mariadb:10.3
+        container_name: mariadb
+        environment:
+            MYSQL_ROOT_PASSWORD: HealthX!Chain123Root
+            MYSQL_DATABASE: swabx
+            MYSQL_USER: swabx
+            MYSQL_PASSWORD: HealthX!Chain123BLR
+        networks:
+            - vpcbr
+        healthcheck:
+            test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+            timeout: 20s
+            retries: 10   
+    api:
+        image: blockchain.azurecr.io/breathalyzer_api:swabx
+        container_name: api
+        networks:
+            - vpcbr
+        build:
+            context: .
+            dockerfile: Dockerfile
+        links:
+            - mariadb
+        depends_on:
+            mariadb:
+                condition: service_healthy
+        environment:
+            NODE_ENV: production
+            MYSQL_HOST: mariadb
+            MYSQL_PORT: 3306
+            MYSQL_DATABASE: swabx
+            MYSQL_USER: swabx
+            MYSQL_PASSWORD: HealthX!Chain123BLR
+            SECRET: 551531dca26542b188cb3803ab4de7b9
+            BC_URL: http://10.2.0.4:8080/api/v1
+            MONGO_URL: mongodb://10.2.1.6:27017
+            MONGO_DATABASE: HealthX_1
+            PUBLIC_URL: https://swabx.healthx.global
+        restart: always
+    
+networks:
+    vpcbr:
+        driver: bridge
