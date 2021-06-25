@@ -39,7 +39,10 @@ async function create(params, userID) {
   }
   //
   // this should be customer id taken from params.
-  const location = new db.Location({ accountId: userID, location: params.location });
+  const location = new db.Location({
+    accountId: userID,
+    location: params.location
+  });
   // save location
   await location.save();
   let slot = {

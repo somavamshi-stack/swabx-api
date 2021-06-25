@@ -35,7 +35,12 @@ function sendRequest(path, method, query, payload) {
     request(options, function (err, resp, body) {
       if (err != null) {
         logger.error("Exception", err);
-        return resolve({ statusCode: 500, body: { message: "External Service is down please try after sometime." } });
+        return resolve({
+          statusCode: 500,
+          body: {
+            message: "External Service is down please try after sometime."
+          }
+        });
       }
       resolve({ statusCode: resp.statusCode, body });
     });

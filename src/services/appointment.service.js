@@ -40,7 +40,9 @@ async function listAppointments(req, res) {
       for (let i = 0; i < response.body.data.length; i++) {
         let rec = response.body.data[i];
         if (rec.status == "Upcoming") {
-          let patient = await db.Account.findOne({ where: { id: rec.patientid } });
+          let patient = await db.Account.findOne({
+            where: { id: rec.patientid }
+          });
           if (patient != null) {
             rec.patient = patient.name;
           } else {

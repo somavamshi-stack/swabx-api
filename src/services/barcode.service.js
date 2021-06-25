@@ -21,7 +21,9 @@ const upload = async (req, res) => {
       rows.shift();
 
       if (rows.length > 10000) {
-        return res.status(400).send({ message: "Exceeding maximum file upload limit. Max Limit: 10000 barcodes per file upload." });
+        return res.status(400).send({
+          message: "Exceeding maximum file upload limit. Max Limit: 10000 barcodes per file upload."
+        });
       }
       let barcodes = [],
         invalid = [],
@@ -51,7 +53,9 @@ const upload = async (req, res) => {
       }
 
       for (let i = 0; i < barcodes.length; i++) {
-        let result = await db.Barcode.findOne({ where: { code: barcodes[i].code } });
+        let result = await db.Barcode.findOne({
+          where: { code: barcodes[i].code }
+        });
         if (result != null) {
           duplicates.push(barcodes[i].code);
         } else {
@@ -147,7 +151,12 @@ const findAll = (req, res) => {
     orderW = [[sortBy || "createdAt", order || "DESC"]];
   }
 
-  db.Barcode.findAndCountAll({ where: { code: { [Op.like]: `%${token}%` }, status: { [Op.in]: status } }, limit, offset, order: orderW })
+  db.Barcode.findAndCountAll({
+    where: { code: { [Op.like]: `%${token}%` }, status: { [Op.in]: status } },
+    limit,
+    offset,
+    order: orderW
+  })
     .then((data) => {
       res.send(Pagination.getPagingData(data, page, limit));
     })

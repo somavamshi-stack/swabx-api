@@ -472,7 +472,11 @@ async function sendPasswordResetOTP(account) {
   return await sendEmail(
     account.email,
     "verification-code.html",
-    { activationLink: account.resetToken, loginId: account.email, name: account.name },
+    {
+      activationLink: account.resetToken,
+      loginId: account.email,
+      name: account.name
+    },
     `${CLIENT_NAME} password assistance`
   );
 }

@@ -50,7 +50,12 @@ function authenticate(req, res, next) {
   const { email, password } = req.body;
   const ipAddress = req.ip;
   accountService
-    .authenticate({ email, password, ipAddress, userAgent: req.headers["user-agent"] })
+    .authenticate({
+      email,
+      password,
+      ipAddress,
+      userAgent: req.headers["user-agent"]
+    })
     .then(({ refreshToken, ...account }) => {
       setTokenCookie(res, refreshToken);
       res.json({
