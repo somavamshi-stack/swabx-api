@@ -8,13 +8,19 @@ const cors = require("cors");
 const errorHandler = require("./_middleware/error-handler");
 const tls = require("tls");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 const http = require("http");
 
 require("dotenv").config();
 require("./_helpers/db");
 
-const app = express();
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 6000 // limit each IP to 6000 requests per windowMs
+});
 
+const app = express();
+app.use(limiter);
 app.set("trust proxy", 1);
 app.set("etag", false); // turning off etag
 marked.setOptions({
