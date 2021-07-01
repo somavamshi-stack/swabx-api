@@ -50,7 +50,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 // allow cors requests from any origin and with credentials
-const allowlist = ["https://swabx.healthx.global"];
+const allowlist = ["https://swabx.healthx.global", "http://localhost:3000", "http://127.0.0.1:3000"];
 const corsOptionsDelegate = (req, callback) => {
   let corsOptions = {
     origin: false,
