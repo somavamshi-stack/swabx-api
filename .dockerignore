@@ -1,0 +1,12 @@
+.git
+.github
+.gitignore
+node_modules
+npm-debug.log
+*Dockerfile*
+*docker-compose*
+.vscode
+log
+dockerbuild.sh
+.env
+.prettier*
