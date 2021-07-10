@@ -8,7 +8,6 @@ EXPOSE 80
 WORKDIR /app/api
 
 COPY package.json .
-COPY package-lock.json .
 RUN npm install --production --quiet --no-progress && npm cache clean --force
 COPY . .
 CMD npm start;

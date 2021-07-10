@@ -203,16 +203,7 @@ const getTestStats = async (req, res) => {
     const patients = await mdb.collection(AppID + "_Registration").count();
     const totalInvaidResults = await mdb
       .collection(AppID + "_stats")
-      .aggregate([
-        {
-          $match: {
-            $expr: {
-              $and: [{ $gte: [{ $toDate: "$_id" }, new Date(start)] }, { $lte: [{ $toDate: "$_id" }, new Date(end)] }]
-            }
-          }
-        },
-        { $group: { _id: "$diagnosis", count: { $sum: 1 } } }
-      ])
+      .aggregate([{ $match: { updatedAt: { $gte: start, $lte: end } } }, { $group: { _id: "$diagnosis", count: { $sum: 1 } } }])
       .toArray();
 
     let negative = 0,
@@ -279,9 +270,7 @@ const getAvgStats = async (req, res) => {
       .aggregate([
         {
           $match: {
-            $expr: {
-              $and: [{ $gte: [{ $toDate: "$_id" }, new Date(start)] }, { $lte: [{ $toDate: "$_id" }, new Date(end)] }]
-            }
+            updatedAt: { $gte: start, $lte: end }
           }
         },
         {
@@ -295,6 +284,7 @@ const getAvgStats = async (req, res) => {
         }
       ])
       .toArray();
+
     stats = stats.sort(function (a, b) {
       return b.count - a.count;
     });
