@@ -36,7 +36,7 @@ services:
             MYSQL_PASSWORD: HealthX!Chain123BLR
             SECRET: 551531dca26542b188cb3803ab4de7b9
             BC_URL: http://10.2.0.4:8080/api/v1
-            MONGO_URL: mongodb://10.2.1.6:27017
+            MONGO_URL: mongodb://10.2.0.4:27017
             MONGO_DATABASE: HealthX_1
             PUBLIC_URL: https://swabx.healthx.global
         restart: always

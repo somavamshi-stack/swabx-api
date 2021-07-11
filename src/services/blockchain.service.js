@@ -6,7 +6,7 @@ const logger = require("../utils/logger");
 const appointment = require("./appointment.request");
 
 const BC_URL = process.env.BC_URL || "http://10.2.0.4:8080/api/v1";
-const MONGO_URL = process.env.MONGO_URL || "mongodb://10.2.1.6:27017";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://10.2.0.4:27017";
 const AppID = "SwabX";
 const BC_HEADERS = {
   "User-Agent": AppID,
