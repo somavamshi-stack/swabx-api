@@ -248,8 +248,8 @@ const getTestStats = async (req, res) => {
 const getAvgStats = async (req, res) => {
   try {
     logger.info(`Query string params: ${JSON.stringify(req.query)}`);
-    const start = req.query.startDate + " 00:00:00";
-    const end = req.query.endDate + " 23:59:59";
+    const start = req.query.startDate + "T00:00:00";
+    const end = req.query.endDate + "T23:59:59";
     logger.info(`Executing getAvgStats mongo call with Start:${start}, End:${end}`);
 
     const custMap = {};
