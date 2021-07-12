@@ -31,7 +31,6 @@ function sendRequest(path, method, query, payload) {
       agent: keepAliveAgent,
       time: true
     };
-    console.log(options.url);
     request(options, function (err, resp, body) {
       if (err != null) {
         logger.error("Exception", err);

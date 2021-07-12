@@ -318,7 +318,8 @@ const patientList = async (req, res) => {
     attributes: ["code", "patientId", "diagnosis"],
     where: {
       locationId: req.query.locationId,
-      checkoutTime: null
+      checkoutTime: null,
+      status: { [Op.ne]: 2 }
     }
   });
   res.send(location);
