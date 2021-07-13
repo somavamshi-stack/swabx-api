@@ -10,3 +10,4 @@ log
 dockerbuild.sh
 .env
 .prettier*
+*.csv

@@ -46,7 +46,7 @@ function authenticateSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function authenticate(req, res, next) {
+function authenticate(req, res) {
   const { email, password } = req.body;
   const ipAddress = req.ip;
   accountService
@@ -68,10 +68,12 @@ function authenticate(req, res, next) {
         refreshToken
       });
     })
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
-function refreshTokenMW(req, res, next) {
+function refreshTokenMW(req, res) {
   const token = req.cookies.refreshToken;
   if (token == null) {
     return res.status(401).json({ message: "token_not_valid" });
@@ -91,7 +93,9 @@ function refreshTokenMW(req, res, next) {
         refreshToken
       });
     })
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function revokeTokenSchema(req, res, next) {
@@ -101,7 +105,7 @@ function revokeTokenSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function revokeToken(req, res, next) {
+function revokeToken(req, res) {
   // accept token from request body or cookie
   const token = req.body.token || req.cookies.refreshToken;
   const ipAddress = req.ip;
@@ -116,7 +120,9 @@ function revokeToken(req, res, next) {
   accountService
     .revokeToken({ token, ipAddress })
     .then(() => res.json({ message: "Token revoked" }))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function registerSchema(req, res, next) {
@@ -136,22 +142,17 @@ function registerSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function register(req, res, next) {
+function register(req, res) {
   accountService
     .register(req.body)
     .then((result) => {
-      if (result) {
-        res.json({
-          message: "Registration successful, please check your email for verification instructions"
-        });
-      } else {
-        res.json({
-          message:
-            "email id is already registered, please check your mail. \nIncase forgotten password click on Forgot Password to reset your account password."
-        });
-      }
+      res.json({
+        message: "Registration successful, please check your email for verification instructions"
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function verifyEmailSchema(req, res, next) {
@@ -162,11 +163,13 @@ function verifyEmailSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function verifyEmail(req, res, next) {
+function verifyEmail(req, res) {
   accountService
     .verifyEmail(req.body)
     .then(() => res.json({ message: "Verification successful, you can now login" }))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function changePasswordSchema(req, res, next) {
@@ -182,7 +185,7 @@ function changePasswordSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function changePassword(req, res, next) {
+function changePassword(req, res) {
   if (req.body.oldPassword == req.body.password) {
     return res.status(400).json({
       message: "New password cannot be same as old password"
@@ -195,7 +198,9 @@ function changePassword(req, res, next) {
         message: "Password changed successfully, you can now login with the new password"
       })
     )
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function forgotPasswordSchema(req, res, next) {
@@ -205,7 +210,7 @@ function forgotPasswordSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function forgotPassword(req, res, next) {
+function forgotPassword(req, res) {
   accountService
     .forgotPassword(req.body)
     .then(() =>
@@ -213,7 +218,9 @@ function forgotPassword(req, res, next) {
         message: "Please check your email for password reset instructions"
       })
     )
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function validateResetTokenSchema(req, res, next) {
@@ -224,11 +231,13 @@ function validateResetTokenSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function validateResetToken(req, res, next) {
+function validateResetToken(req, res) {
   accountService
     .validateResetToken(req.body)
     .then(() => res.json({ message: "Token is valid" }))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function resetPasswordSchema(req, res, next) {
@@ -245,30 +254,34 @@ function resetPasswordSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function resetPassword(req, res, next) {
+function resetPassword(req, res) {
   accountService
     .resetPassword(req.body)
     .then(() => res.json({ message: "Password reset successful, you can now login" }))
     .catch(() => res.status(400).json({ message: "Please enter valid token" }));
 }
 
-function getAll(req, res, next) {
+function getAll(req, res) {
   accountService
     .getAll()
     .then((accounts) => res.json(accounts))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
-function getAllByRole(req, res, next) {
+function getAllByRole(req, res) {
   accountService
     .getAllByRole(req, res)
     .then((accounts) => {
       res.json(accounts);
     })
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
-function getById(req, res, next) {
+function getById(req, res) {
   // users can get their own account and admins can get any account
   if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -277,7 +290,9 @@ function getById(req, res, next) {
   accountService
     .getById(req.params.id)
     .then((account) => (account ? res.json(account) : res.sendStatus(404)))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function createSchema(req, res, next) {
@@ -297,11 +312,13 @@ function createSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function create(req, res, next) {
+function create(req, res) {
   accountService
     .create(req.body, req.user.id)
     .then((account) => res.json(account))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
 
 function updateSchema(req, res, next) {
@@ -327,7 +344,7 @@ function updateSchema(req, res, next) {
   validateRequest(req, next, schema);
 }
 
-function update(req, res, next) {
+function update(req, res) {
   // users can update their own account and admins can update any account
   if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin && req.user.role !== Role.Customer) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -336,22 +353,10 @@ function update(req, res, next) {
   accountService
     .update(req.params.id, req.body, req.user.id, req.user.role)
     .then((account) => res.json(account))
-    .catch(next);
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 }
-
-function _delete(req, res, next) {
-  // users can delete their own account and admins can delete any account
-  if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin && req.user.role !== Role.Customer) {
-    return res.status(401).json({ message: "Unauthorized to Delete Account" });
-  }
-
-  accountService
-    .delete(req.params.id, req.user.id)
-    .then(() => res.json({ message: "Account deleted successfully" }))
-    .catch(next);
-}
-
-// helper functions
 
 function setTokenCookie(res, token) {
   // create cookie with refresh token that expires in 7 days

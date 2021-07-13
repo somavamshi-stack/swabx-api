@@ -81,7 +81,16 @@ app.use("/api/v1/bc", require("./controllers/blockchain.controller"));
 app.use("/api/v1/appointment", require("./controllers/appointment.controller"));
 
 // global error handler
-app.use(errorHandler);
+app.use((req, res) => {
+  res.status(404).json({ message: "Resource Not Found." });
+});
+app.use((err, req, res) => {
+  res.status(err.statusCode || 500);
+  res.render("error", {
+    message: err.message,
+    error: app.get("env") === "development" ? err : {}
+  });
+});
 
 // start server
 const port = process.env.PORT || 80;
