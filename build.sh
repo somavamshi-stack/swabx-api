@@ -1,5 +1,5 @@
 start=`date +%s`
-sh generate.sh
+#sh generate.sh
 npm run prettify
 docker-compose -f docker-compose.yml build
 

@@ -5,15 +5,21 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const marked = require("marked");
 const cors = require("cors");
-const errorHandler = require("./_middleware/error-handler");
+const fs = require("fs");
 const tls = require("tls");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const http = require("http");
-
+const https = require("https");
+const RedisMan = require("./utils/redis_man");
+const nocache = require("nocache");
 require("dotenv").config();
 require("./_helpers/db");
-const RedisMan = require("./utils/redis_man");
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 6000 // limit each IP to 6000 requests per windowMs
+});
 
 const redisConfig = {
   host: process.env.REDIS_HOST || "10.2.0.4",
@@ -22,11 +28,6 @@ const redisConfig = {
 };
 RedisMan.init({
   config: redisConfig
-});
-
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 6000 // limit each IP to 6000 requests per windowMs
 });
 
 const app = express();
@@ -48,6 +49,7 @@ app.use(
     action: "sameorigin"
   })
 );
+app.use(nocache());
 
 app.use(helmet.xssFilter());
 app.use(helmet.noSniff());
@@ -102,11 +104,23 @@ app.use((err, req, res) => {
   });
 });
 
+app.use((err, req, res) => {
+  return res.status(err.status || 500).json("error", { message: "Internal Server Error." });
+});
+
 // start server
-const port = process.env.PORT || 80;
 
 tls.CLIENT_RENEG_LIMIT = 0;
-const server = http.createServer(app);
+var server;
+if (process.env.NODE_ENV == "production") {
+  const privateKey = fs.readFileSync(path.join(__dirname, "privkey.pem"), "utf8");
+  const certificate = fs.readFileSync(path.join(__dirname, "fullchain.pem"), "utf8");
+  server = https.createServer({ key: privateKey, cert: certificate }, app);
+  port = process.env.PORT || 443;
+} else {
+  server = http.createServer(app);
+  port = process.env.PORT || 80;
+}
 server.listen(port, () => console.log("Server listening on port " + port));
 
 process.on("SIGINT", shutdown);
