@@ -30,6 +30,20 @@ function model(sequelize) {
       defaultValue: DataTypes.NOW
     },
     updated: { type: DataTypes.DATE },
+    activationDt: { type: DataTypes.DATE },
+    expiryDt: { type: DataTypes.DATE },
+    isActivated: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.activationDt && new Date(this.activationDt).getTime() < new Date().getTime();
+      }
+    },
+    isExpired: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.expiryDt && new Date(this.expiryDt).getTime() > new Date().getTime();
+      }
+    },
     isVerified: {
       type: DataTypes.VIRTUAL,
       get() {

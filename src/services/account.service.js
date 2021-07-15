@@ -10,11 +10,13 @@ const db = require("../_helpers/db");
 const Role = require("../_helpers/role");
 const API_URL = process.env.PUBLIC_URL + "/api/v1";
 const timeParser = require("parse-duration");
+const RedisMan = require("../utils/redis_man");
 const OTP_EXPIRY_TIME = (process.env.OTP_EXPIRY_TIME && timeParser(process.env.OTP_EXPIRY_TIME)) || timeParser("5m");
 const REFRESH_TOKEN_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("2h");
 const TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY || "1h";
 const CLIENT_NAME = process.env.CLIENT_NAME || "TracieX";
 const PRIV_KEY = fs.readFileSync(path.join(__dirname, "../..", "/keys/id_rsa_priv.pem"), "utf8");
+const MAX_ALLOWED_OTP = (process.env.MAX_ALLOWED_OTP && Number(process.env.MAX_ALLOWED_OTP)) || 5;
 
 module.exports = {
   authenticate,
@@ -39,12 +41,20 @@ async function authenticate({ email, password, ipAddress, userAgent }) {
     where: { email }
   });
 
-  if (!account || !account.isVerified || !(await bcrypt.compare(password, account.passwordHash))) {
+  if (!account || !(await bcrypt.compare(password, account.passwordHash))) {
     let msg = "Email or password is incorrect";
     if (userAgent == "HealthX-Mobile") {
       msg += "\nIn case you do not have Account please Signup";
     }
     throw new Error(msg);
+  }
+
+  if (!account.isActivated || !account.isVerified) {
+    throw new Error("User account activation is pending.");
+  }
+
+  if (!account.isExpired) {
+    throw new Error("User account has expired");
   }
 
   // authentication successful so generate jwt and refresh tokens
@@ -133,7 +143,17 @@ async function verifyEmail({ token, email }) {
     where: { verificationToken: token, email: email }
   });
 
-  if (!account) throw new Error("Verification failed");
+  if (!account) {
+    let key = "swabx:account:user:" + email;
+    let connection = await RedisMan.getConnection();
+    if ((await connection.get(key)) >= MAX_ALLOWED_OTP) {
+      await connection.expire(key, OTP_EXPIRY_TIME);
+      throw new Error("You exceeded OTP request max attempt.");
+    } else {
+      await connection.incr(key);
+      throw new Error("Verification failed");
+    }
+  }
 
   account.verified = Date.now();
   account.verificationToken = null;

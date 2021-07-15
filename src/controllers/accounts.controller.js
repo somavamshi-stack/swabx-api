@@ -6,6 +6,7 @@ const authorize = require("../_middleware/authorize");
 const Role = require("../_helpers/role");
 const accountService = require("../services/account.service");
 const timeParser = require("parse-duration");
+const moment = require("moment");
 const NAME_REGEX = /^[a-zA-Z0-9_ ]{4,25}$/;
 const NAME_RULE = {
   message:
@@ -313,6 +314,8 @@ function createSchema(req, res, next) {
 }
 
 function create(req, res) {
+  req.body.activationDt = moment(new Date().getTime()).format("YYYY-MM-DD hh:mm:ss");
+  req.body.expiryDt = moment().add(10, "y").format("YYYY-MM-DD hh:mm:ss");
   accountService
     .create(req.body, req.user.id)
     .then((account) => res.json(account))

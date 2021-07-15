@@ -13,6 +13,16 @@ const http = require("http");
 
 require("dotenv").config();
 require("./_helpers/db");
+const RedisMan = require("./utils/redis_man");
+
+const redisConfig = {
+  host: process.env.REDIS_HOST || "10.2.0.4",
+  port: process.env.REDIS_PORT || 6379,
+  password: process.env.REDIS_PASSWORD || "HealthX!Chain123BLR"
+};
+RedisMan.init({
+  config: redisConfig
+});
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
