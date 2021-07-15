@@ -8,9 +8,9 @@ const db = require("../_helpers/db");
 const Role = require("../_helpers/role");
 const API_URL = process.env.PUBLIC_URL + "/api/v1";
 const timeParser = require("parse-duration");
-const OTP_EXPIRY_TIME = timeParser("5m"); // (process.env.OTP_EXPIRY_TIME && timeParser(process.env.OTP_EXPIRY_TIME)) || timeParser("5m");
-const REFRESH_TOKEN_EXPIRY = timeParser("10d"); //(process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("45m");
-const TOKEN_EXPIRY = "10d"; // process.env.JWT_TOKEN_EXPIRY || "2h";
+const OTP_EXPIRY_TIME = (process.env.OTP_EXPIRY_TIME && timeParser(process.env.OTP_EXPIRY_TIME)) || timeParser("5m");
+const REFRESH_TOKEN_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("2h");
+const TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY || "1h";
 const CLIENT_NAME = process.env.CLIENT_NAME || "SwabX";
 
 module.exports = {
