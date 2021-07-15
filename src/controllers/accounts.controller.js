@@ -194,12 +194,12 @@ function changePassword(req, res) {
   accountService
     .changePassword(req.user.id, req.body)
     .then(() =>
-      res.json({
+      res.send({
         message: "Password changed successfully, you can now login with the new password"
       })
     )
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send({ message: err });
     });
 }
 
@@ -358,6 +358,7 @@ function update(req, res) {
     });
 }
 
+// helper functions
 function setTokenCookie(res, token) {
   // create cookie with refresh token that expires in 7 days
   const cookieOptions = {

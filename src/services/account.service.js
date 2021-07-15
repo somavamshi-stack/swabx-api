@@ -1,4 +1,6 @@
-﻿const jwt = require("jsonwebtoken");
+﻿const fs = require("fs");
+const path = require("path");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
@@ -11,7 +13,8 @@ const timeParser = require("parse-duration");
 const OTP_EXPIRY_TIME = (process.env.OTP_EXPIRY_TIME && timeParser(process.env.OTP_EXPIRY_TIME)) || timeParser("5m");
 const REFRESH_TOKEN_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("2h");
 const TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY || "1h";
-const CLIENT_NAME = process.env.CLIENT_NAME || "SwabX";
+const CLIENT_NAME = process.env.CLIENT_NAME || "TracieX";
+const PRIV_KEY = fs.readFileSync(path.join(__dirname, "../..", "/keys/id_rsa_priv.pem"), "utf8");
 
 module.exports = {
   authenticate,
@@ -362,8 +365,9 @@ async function hash(password) {
 
 function generateJwtToken(account) {
   // create a jwt token containing the account id that expires in 15 minutes
-  return jwt.sign({ sub: account.id, id: account.id }, process.env.SECRET, {
-    expiresIn: TOKEN_EXPIRY
+  return jwt.sign({ sub: account.id, id: account.id }, PRIV_KEY, {
+    expiresIn: TOKEN_EXPIRY,
+    algorithm: "RS256"
   });
 }
 
@@ -416,35 +420,43 @@ function basicDetails(account) {
 }
 
 async function sendOnboardEmail(account, password) {
-  return await sendEmail(
-    account.email,
-    [Role.Patient, Role.Customer, Role.Staff].includes(account.role) ? "welcome-customer.html" : "welcome-admin.html",
-    {
-      activationLink: API_URL + "/accounts/verify-otp",
-      name: account.name,
-      loginId: account.email,
-      password
-    },
-    `Welcome to ${CLIENT_NAME}`
-  );
+  try {
+    return await sendEmail(
+      account.email,
+      [Role.Patient, Role.Customer, Role.Staff].includes(account.role) ? "welcome-customer.html" : "welcome-admin.html",
+      {
+        activationLink: API_URL + "/accounts/verify-otp",
+        name: account.name,
+        loginId: account.email,
+        password
+      },
+      `Welcome to ${CLIENT_NAME}`
+    );
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function sendVerificationEmail(account) {
-  const verifyUrl =
-    account.role == Role.Admin ? `${API_URL}/accounts/verify-email?token=${account.verificationToken}` : `${account.verificationToken}`;
-  const activationLinkValidity = 3;
+  try {
+    const verifyUrl =
+      account.role == Role.Admin ? `${API_URL}/accounts/verify-email?token=${account.verificationToken}` : `${account.verificationToken}`;
+    const activationLinkValidity = 3;
 
-  return await sendEmail(
-    account.email,
-    account.role == Role.Admin ? "welcome.html" : "verification-code.html",
-    {
-      activationLink: verifyUrl,
-      name: account.name,
-      loginId: account.email,
-      activationLinkValidity: activationLinkValidity
-    },
-    `Welcome to ${CLIENT_NAME}`
-  );
+    return await sendEmail(
+      account.email,
+      account.role == Role.Admin ? "welcome.html" : "verification-code.html",
+      {
+        activationLink: verifyUrl,
+        name: account.name,
+        loginId: account.email,
+        activationLinkValidity: activationLinkValidity
+      },
+      `Welcome to ${CLIENT_NAME}`
+    );
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function sendAlreadyRegisteredEmail(account) {
@@ -459,24 +471,32 @@ async function sendAlreadyRegisteredEmail(account) {
 }
 
 async function sendPasswordResetEmail(account) {
-  const resetUrl = `${API_URL}/account/reset-password?token=${account.resetToken}`;
-  return await sendEmail(
-    account.email,
-    "password-reset.html",
-    { activationLink: resetUrl, loginId: account.email, name: account.name },
-    `Revision to Your ${CLIENT_NAME} Account`
-  );
+  try {
+    const resetUrl = `${API_URL}/account/reset-password?token=${account.resetToken}`;
+    return await sendEmail(
+      account.email,
+      "password-reset.html",
+      { activationLink: resetUrl, loginId: account.email, name: account.name },
+      `Revision to Your ${CLIENT_NAME} Account`
+    );
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function sendPasswordResetOTP(account) {
-  return await sendEmail(
-    account.email,
-    "verification-code.html",
-    {
-      activationLink: account.resetToken,
-      loginId: account.email,
-      name: account.name
-    },
-    `${CLIENT_NAME} password assistance`
-  );
+  try {
+    return await sendEmail(
+      account.email,
+      "verification-code.html",
+      {
+        activationLink: account.resetToken,
+        loginId: account.email,
+        name: account.name
+      },
+      `${CLIENT_NAME} password assistance`
+    );
+  } catch (error) {
+    console.error(error);
+  }
 }

@@ -1,5 +1,9 @@
 const jwt = require("express-jwt");
 const db = require("../_helpers/db");
+const fs = require("fs");
+const path = require("path");
+
+const PUB_KEY = fs.readFileSync(path.join(__dirname, "../..", "/keys/id_rsa_pub.pem"), "utf8");
 
 module.exports = authorize;
 
@@ -12,7 +16,7 @@ function authorize(roles = []) {
 
   return [
     // authenticate JWT token and attach user to request object (req.user)
-    jwt({ secret: process.env.SECRET, algorithms: ["HS256"] }),
+    jwt({ secret: PUB_KEY, algorithms: ["RS256"] }),
 
     // authorize based on user role
     async (req, res, next) => {
