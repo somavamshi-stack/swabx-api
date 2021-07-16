@@ -11,6 +11,7 @@ const Role = require("../_helpers/role");
 const API_URL = process.env.PUBLIC_URL + "/api/v1";
 const timeParser = require("parse-duration");
 const RedisMan = require("../utils/redis_man");
+const moment = require("moment");
 const OTP_EXPIRY_TIME = (process.env.OTP_EXPIRY_TIME && timeParser(process.env.OTP_EXPIRY_TIME)) || timeParser("5m");
 const REFRESH_TOKEN_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("2h");
 const TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY || "1h";
@@ -113,6 +114,9 @@ function register(params) {
       resolve(false);
       return await sendAlreadyRegisteredEmail(info);
     }
+
+    params.activationDt = moment(new Date().getTime()).format("YYYY-MM-DD hh:mm:ss");
+    params.expiryDt = moment().add(10, "y").format("YYYY-MM-DD hh:mm:ss");
 
     // create account object
     const account = new db.Account(params);
