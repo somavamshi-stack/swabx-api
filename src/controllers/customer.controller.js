@@ -110,7 +110,9 @@ function createStaff(req, res, next) {
   accountService
     .create(req.body, req.user.id)
     .then((account) => res.json(account))
-    .catch(next);
+    .catch((err) => {
+      res.status(400).send({ message: err.message });
+    });
 }
 
 function getAllStaff(req, res, next) {
@@ -123,7 +125,7 @@ function getAllStaff(req, res, next) {
 function getStaffById(req, res, next) {
   // users can get their own account and admins can get any account
   if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin && req.user.role !== Role.Customer) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized Access" });
   }
 
   accountService
@@ -159,7 +161,7 @@ function getAllLocationsCust(req, res, next) {
 function getLocationById(req, res, next) {
   // users can get their own customer and admins can get any customer
   if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin && req.user.role !== Role.Customer) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized Access" });
   }
   locationService
     .getById(req.params.id, req.user.id)
@@ -180,24 +182,30 @@ function createLocation(req, res, next) {
   locationService
     .create(req.body, req.user.id)
     .then((location) => res.json(location))
-    .catch(next);
+    .catch((err) => {
+      res.status(400).send({ message: err.message });
+    });
 }
 
 function updateLocation(req, res, next) {
   // users can update their own location and admins can update any location
   if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin && req.user.role !== Role.Customer) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized Access" });
   }
 
   locationService
     .update(req.params.id, req.body, req.user.id)
     .then((location) => res.json(location))
-    .catch(next);
+    .catch((err) => {
+      res.status(400).send({ message: err.message });
+    });
 }
 
 function _deleteLocation(req, res, next) {
   locationService
     .delete(req.params.id, req.user.id)
     .then(() => res.json({ message: "Location deleted successfully" }))
-    .catch(next);
+    .catch((err) => {
+      res.status(400).send({ message: err.message });
+    });
 }

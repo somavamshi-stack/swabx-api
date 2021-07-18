@@ -11,7 +11,7 @@ const Op = require("sequelize").Op;
 const upload = async (req, res) => {
   try {
     if (req.file === undefined) {
-      return res.status(400).send({ message: "Please upload a excel file!" });
+      return res.status(400).send({ message: "Please upload an Excel file!" });
     }
 
     let path = __dirname + "/../_middleware/uploads/" + req.file.filename;
@@ -177,7 +177,7 @@ const deleteCode = (req, res, next) => {
   db.Barcode.destroy({ where: { code: req.params.code } })
     .then((data) => {
       if (data === 1) {
-        res.send({ message: "Barcode delete successfully" });
+        res.send({ message: "Barcode deleted successfully" });
       } else {
         res.status(404).send({ message: "Barcode not found" });
       }
@@ -204,7 +204,7 @@ const verify = async (req, res) => {
     return res.send({ message: "Barcode is available" });
   } catch (e) {
     res.status(500).send({
-      message: err.message || "Some error occurred while verifyin barcode."
+      message: err.message || "Some error occurred while verifying barcode."
     });
   }
 };
@@ -254,7 +254,7 @@ const report = async (req, res) => {
     });
   } catch (err) {
     res.status(500).send({
-      message: err.message || "Some error occurred while verifyin barcode."
+      message: err.message || "Some error occurred while verifying barcode."
     });
   }
 };
@@ -287,7 +287,7 @@ const customerUsageReport = async (req, res) => {
     });
   } catch (err) {
     res.status(500).send({
-      message: err.message || "Some error occurred while verifyin barcode."
+      message: err.message || "Some error occurred while verifying barcode."
     });
   }
 };
@@ -320,7 +320,7 @@ const staffUsageReport = async (req, res) => {
     });
   } catch (err) {
     res.status(500).send({
-      message: err.message || "Some error occurred while verifyin barcode."
+      message: err.message || "Some error occurred while verifying barcode."
     });
   }
 };

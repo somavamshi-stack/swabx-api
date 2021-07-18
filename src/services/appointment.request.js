@@ -37,7 +37,7 @@ function sendRequest(path, method, query, payload) {
         return resolve({
           statusCode: 500,
           body: {
-            message: "External Service is down please try after sometime."
+            message: "External Service is down. Please try after sometime."
           }
         });
       }

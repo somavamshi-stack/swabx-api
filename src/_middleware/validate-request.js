@@ -10,7 +10,7 @@ function validateRequest(req, next, schema) {
   };
   const { error, value } = schema.validate(req.body, options);
   if (error) {
-    next(`${error.details.map((x) => x.message).join(", ")}`);
+    next(`Invalid input: ${error.details.map((x) => x.message).join(", ")}`);
   } else {
     req.body = value;
     next();
@@ -25,7 +25,7 @@ function validateQueryString(req, next, schema) {
   };
   const { error, value } = schema.validate(req.query, options);
   if (error) {
-    next(`${error.details.map((x) => x.message).join(", ")}`);
+    next(`Invalid input: ${error.details.map((x) => x.message).join(", ")}`);
   } else {
     req.query = value;
     next();
@@ -40,7 +40,7 @@ function validateParamString(req, next, schema) {
   };
   const { error, value } = schema.validate(req.params, options);
   if (error) {
-    next(`${error.details.map((x) => x.message).join(", ")}`);
+    next(`Invalid input: ${error.details.map((x) => x.message).join(", ")}`);
   } else {
     req.params = value;
     next();

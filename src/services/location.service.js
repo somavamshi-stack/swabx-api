@@ -35,7 +35,7 @@ async function create(params, userID) {
       where: { location: params.location, accountId: userID }
     })
   ) {
-    throw 'Location "' + params.location + '" already exist';
+    throw 'Location "' + params.location + '" already exists';
   }
   //
   // this should be customer id taken from params.
@@ -67,7 +67,7 @@ async function update(id, params, userID) {
       where: { location: params.location, accountId: userID }
     }))
   ) {
-    throw new Error('Location "' + params.location + '" already exist');
+    throw new Error('Location "' + params.location + '" already exists');
   }
 
   // copy params to location and save
@@ -83,7 +83,7 @@ async function _delete(id, userID) {
     const location = await getLocation(id, userID);
     await location.destroy();
   } catch (error) {
-    throw new Error("Location does not exists");
+    throw new Error("Location does not exist");
   }
 }
 

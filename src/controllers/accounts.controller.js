@@ -70,14 +70,14 @@ function authenticate(req, res) {
       });
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      res.status(400).send({ message: err.message });
     });
 }
 
 function refreshTokenMW(req, res) {
   const token = req.cookies.refreshToken;
   if (token === null) {
-    return res.status(401).json({ message: "token_not_valid" });
+    return res.status(401).json({ message: "Token Not Valid" });
   }
   const ipAddress = req.ip;
   accountService
@@ -285,7 +285,7 @@ function getAllByRole(req, res) {
 function getById(req, res) {
   // users can get their own account and admins can get any account
   if (Number(req.params.id) !== req.user.id && req.user.role !== Role.Admin) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized Access" });
   }
 
   accountService
