@@ -15,7 +15,7 @@ async function initialize() {
 
   // connect to db
   const sequelize = new Sequelize(database, user, password, {
-    logging: false,
+    logging: process.env.NODE_ENV !== "production",
     host: host,
     port: port,
     dialect: dialect,

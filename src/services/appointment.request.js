@@ -32,7 +32,7 @@ function sendRequest(path, method, query, payload) {
       time: true
     };
     request(options, function (err, resp, body) {
-      if (err != null) {
+      if (err !== null) {
         logger.error("Exception", err);
         return resolve({
           statusCode: 500,

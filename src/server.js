@@ -3,7 +3,7 @@ const os = require("os");
 
 const CPUS = os.cpus();
 
-if (process.env.NODE_ENV == "production" && CPUS.length > 1 && cluster.isMaster) {
+if (process.env.NODE_ENV === "production" && CPUS.length > 1 && cluster.isMaster) {
   CPUS.forEach(function () {
     cluster.fork();
   });

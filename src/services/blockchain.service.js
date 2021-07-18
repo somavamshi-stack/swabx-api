@@ -24,13 +24,13 @@ const { Op } = require("sequelize");
 const http = require("http");
 const keepAliveAgent = new http.Agent({
   maxSockets: 40,
-  keepAlive: true,
+  keepAlive: process.env.NODE_ENV === "production",
   maxFreeSockets: 20
 });
 
 var client;
 async function getConnection() {
-  if (client == null) {
+  if (client === null) {
     client = new MongoClient(MONGO_URL, {
       useUnifiedTopology: true
     });
@@ -54,10 +54,10 @@ function sendRequest(path, payload) {
         ...BC_HEADERS
       },
       agent: keepAliveAgent,
-      time: true
+      time: process.env.NODE_ENV !== "production"
     };
     request(options, function (err, resp, body) {
-      if (err != null) {
+      if (err !== null) {
         logger.error("Exception", err);
         return resolve({
           statusCode: 500,
@@ -89,7 +89,7 @@ const register = async (req, res) => {
     const response = await sendRequest(BC_PATHS.REGISTER, req.body);
     res.status(response.statusCode).json(response.body);
 
-    if (response.statusCode == 201 || response.statusCode == 200) {
+    if (response.statusCode === 201 || response.statusCode === 200) {
       try {
         const barcode = new db.Barcode({
           code: req.body.barcode,
@@ -120,7 +120,7 @@ const upload = async (req, res) => {
     res.status(500).json({ error: "Critical error occured, Please Contact Admin" });
   }
   try {
-    if (response && response.statusCode == 201) {
+    if (response && response.statusCode === 201) {
       db.Barcode.update(
         {
           diagnosis: req.body.diagnosis,
@@ -145,7 +145,7 @@ const resultPatient = async (req, res) => {
       limit: 10,
       skip: 0
     });
-    if (response.statusCode == 404) {
+    if (response.statusCode === 404) {
       return res.status(404).send({
         _msg: "No records found",
         _status: 404
@@ -186,7 +186,7 @@ const scrap = async (req, res) => {
       }
     }
   );
-  res.send({ status: status[0] == 1 });
+  res.send({ status: status[0] === 1 });
 };
 const getLocationCount = async (req, res) => {
   const location = await db.Location.count();
@@ -253,7 +253,7 @@ const getAvgStats = async (req, res) => {
     logger.info(`Executing getAvgStats mongo call with Start:${start}, End:${end}`);
 
     const custMap = {};
-    if (req.query.type == "customerId") {
+    if (req.query.type === "customerId") {
       const custList = await db.Account.findAll({
         where: {
           role: Role.Customer
@@ -276,7 +276,7 @@ const getAvgStats = async (req, res) => {
         {
           $group: {
             _id: {
-              cat: req.query.type == "location" ? "$location" : "$customerId"
+              cat: req.query.type === "location" ? "$location" : "$customerId"
             },
             average: { $avg: "$diff" },
             count: { $sum: 1 }
@@ -296,7 +296,7 @@ const getAvgStats = async (req, res) => {
     };
 
     stats.forEach(async (item) => {
-      if (req.query.type == "customerId") {
+      if (req.query.type === "customerId") {
         response.data.push(custMap[item._id.cat] || item._id.cat);
       } else {
         response.data.push(item._id.cat);

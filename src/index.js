@@ -44,11 +44,8 @@ app.use(
     includeSubDomains: true
   })
 );
-app.use(
-  helmet.frameguard({
-    action: "sameorigin"
-  })
-);
+app.use(compression({ threshold: 0, level: 9, memLevel: 9 }));
+app.use(helmet({ frameguard: { action: "deny" } }));
 app.use(nocache());
 
 app.use(helmet.xssFilter());
@@ -62,7 +59,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 // allow cors requests from any origin and with credentials
-const allowlist = ["https://swabx.healthx.global", "http://localhost:3000", "http://127.0.0.1:3000"];
+const allowlist = ["https://swabx.healthx.global"];
 const corsOptionsDelegate = (req, callback) => {
   let corsOptions = {
     origin: false,
@@ -93,26 +90,24 @@ app.use("/api/v1/bc", require("./controllers/blockchain.controller"));
 app.use("/api/v1/appointment", require("./controllers/appointment.controller"));
 
 // global error handler
+
 app.use((req, res) => {
   res.status(404).json({ message: "Resource Not Found." });
 });
-app.use((err, req, res) => {
-  res.status(err.statusCode || 500);
-  res.render("error", {
-    message: err.message,
-    error: app.get("env") === "development" ? err : {}
-  });
-});
 
-app.use((err, req, res) => {
-  return res.status(err.status || 500).json("error", { message: "Internal Server Error." });
+app.use((err, req, res, next) => {
+  //error response for validation error
+  if (typeof err === "string" && err.startsWith("Invalid input")) {
+    return res.status(400).send({ message: err });
+  }
+
+  return res.status(err.status || 500).json({ message: err.message || "Internal Server Error." });
 });
 
 // start server
-
 tls.CLIENT_RENEG_LIMIT = 0;
 var server;
-if (process.env.NODE_ENV == "production") {
+if (process.env.NODE_ENV === "production") {
   const privateKey = fs.readFileSync(path.join(__dirname, "privkey.pem"), "utf8");
   const certificate = fs.readFileSync(path.join(__dirname, "fullchain.pem"), "utf8");
   server = https.createServer({ key: privateKey, cert: certificate }, app);

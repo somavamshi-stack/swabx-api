@@ -8,7 +8,7 @@ async function listAvailableSlots(req, res) {
     const location = await db.Location.findOne({
       where: { id: req.query.locationid }
     });
-    if (location == null) {
+    if (location === null) {
       return res.status(400).send({ _msg: "Location is not identified by System", _status: 400 });
     }
     req.query.customerid = location.accountId;
@@ -29,21 +29,21 @@ async function listAppointments(req, res) {
     const location = await db.Location.findOne({
       where: { id: req.query.locationid }
     });
-    if (location == null) {
+    if (location === null) {
       return res.status(400).send({ _msg: "Location is not identified by System", _status: 400 });
     }
     req.query.customerid = location.accountId;
 
     const response = await sendRequest(APPOINTMENTS, "GET", req.query, req.body);
-    if (response.statusCode == 200) {
+    if (response.statusCode === 200) {
       let data = [];
       for (let i = 0; i < response.body.data.length; i++) {
         let rec = response.body.data[i];
-        if (rec.status == "Upcoming") {
+        if (rec.status === "Upcoming") {
           let patient = await db.Account.findOne({
             where: { id: rec.patientid }
           });
-          if (patient != null) {
+          if (patient !== null) {
             rec.patient = patient.name;
           } else {
             rec.patient = "Anonymous";
@@ -68,7 +68,7 @@ async function myAppointments(req, res) {
   try {
     const locations = await db.Location.findAll();
     const response = await sendRequest(APPOINTMENTS + "/patient/" + req.user.id, "GET", {}, req.body);
-    if (response.statusCode == 200) {
+    if (response.statusCode === 200) {
       let result = [];
       response.body.data &&
         response.body.data.forEach((element) => {
@@ -98,7 +98,7 @@ async function myUpcomingAppointment(req, res) {
       const location = await db.Location.findOne({
         where: { id: response.body.data.locationid }
       });
-      if (location != null) {
+      if (location !== null) {
         delete response.body.data.customerid;
         delete response.body.data.patientid;
         delete response.body.data.s_id;
@@ -120,13 +120,13 @@ async function bookAppointment(req, res) {
     const location = await db.Location.findOne({
       where: { id: req.body.locationid }
     });
-    if (location == null) {
+    if (location === null) {
       return res.status(400).send({ _msg: "Location is not identified by System", _status: 400 });
     }
     req.body.customerid = location.accountId;
     req.body.patientid = req.user.id;
     const response = await sendRequest(APPOINTMENTS, "POST", null, req.body);
-    if (response.body && response.body._status == 500 && response.body._msg.endsWith("undefined")) {
+    if (response.body && response.body._status === 500 && response.body._msg.endsWith("undefined")) {
       return res.status(404).send({ _status: 404, _msg: "Failed to book an appointment" });
     }
     res.status(response.statusCode).json(response.body);

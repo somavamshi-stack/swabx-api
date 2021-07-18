@@ -76,7 +76,7 @@ function authenticate(req, res) {
 
 function refreshTokenMW(req, res) {
   const token = req.cookies.refreshToken;
-  if (token == null) {
+  if (token === null) {
     return res.status(401).json({ message: "token_not_valid" });
   }
   const ipAddress = req.ip;
@@ -187,7 +187,7 @@ function changePasswordSchema(req, res, next) {
 }
 
 function changePassword(req, res) {
-  if (req.body.oldPassword == req.body.password) {
+  if (req.body.oldPassword === req.body.password) {
     return res.status(400).json({
       message: "New password cannot be same as old password"
     });
@@ -365,8 +365,8 @@ function update(req, res) {
 function setTokenCookie(res, token) {
   // create cookie with refresh token that expires in 7 days
   const cookieOptions = {
-    httpOnly: true,
-    secure: true,
+    httpOnly: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production",
     expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY)
   };
   res.cookie("refreshToken", token, cookieOptions);

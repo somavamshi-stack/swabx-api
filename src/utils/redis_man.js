@@ -35,7 +35,7 @@ module.exports = {
     }
     return new Promise((resolve, reject) => {
       const conn = redisPool[key];
-      if (conn && conn.redis != null && conn.status == 1) {
+      if (conn && conn.redis !== null && conn.status === 1) {
         resolve(conn.redis);
       } else {
         conn.redis = new RedisStore(conn.config);
@@ -62,7 +62,7 @@ module.exports = {
   health: () => {
     let report = {};
     Object.keys(redisPool).forEach((key) => {
-      report[key] = redisPool[key].status == 1 ? "OK" : "KO";
+      report[key] = redisPool[key].status === 1 ? "OK" : "KO";
     });
     return report;
   }

@@ -143,7 +143,7 @@ function getAllLocations(req, res, next) {
 
 function getAllLocationsCust(req, res, next) {
   logger.info(`getAllLocations[req.params.customerId: ${req.params.customerId}]`);
-  if (req.user.role == Role.Staff) {
+  if (req.user.role === Role.Staff) {
     locationService
       .getAll(req.user.customerId)
       .then((locations) => res.json(locations))

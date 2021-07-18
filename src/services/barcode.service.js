@@ -10,7 +10,7 @@ const Op = require("sequelize").Op;
 
 const upload = async (req, res) => {
   try {
-    if (req.file == undefined) {
+    if (req.file === undefined) {
       return res.status(400).send({ message: "Please upload a excel file!" });
     }
 
@@ -36,14 +36,14 @@ const upload = async (req, res) => {
           batchId: req.batchId,
           accountId: req.user.id
         };
-        if (barcode && barcode.code != null && /^[a-zA-Z0-9-]{8,20}$/.test(String(barcode.code))) {
+        if (barcode && barcode.code !== null && /^[a-zA-Z0-9-]{8,20}$/.test(String(barcode.code))) {
           barcodes.push(barcode);
         } else {
           invalid.push(barcode.code);
         }
       });
 
-      if (barcodes.length == 0) {
+      if (barcodes.length === 0) {
         return res.status(400).send({
           totalUploaded: rows.length,
           totalInvalid: invalid.length,
@@ -56,14 +56,14 @@ const upload = async (req, res) => {
         let result = await db.Barcode.findOne({
           where: { code: barcodes[i].code }
         });
-        if (result != null) {
+        if (result !== null) {
           duplicates.push(barcodes[i].code);
         } else {
           valid.push(barcodes[i]);
         }
       }
 
-      if (valid.length == 0) {
+      if (valid.length === 0) {
         return res.status(400).send({
           totalUploaded: rows.length,
           totalValid: valid.length,
@@ -143,11 +143,11 @@ const download = (req, res) => {
 // Retrieve all Barcodes from the database.
 const findAll = (req, res) => {
   let { page, size, token, status, order, sortBy } = req.query;
-  if (token == null) token = "";
+  if (token === null) token = "";
   const { limit, offset } = Pagination.getPagination(page, size);
-  status = status != null ? status.split(",") : [0, 1, 2];
+  status = status !== null ? status.split(",") : [0, 1, 2];
   let orderW = [];
-  if (sortBy != null && order != null) {
+  if (sortBy !== null && order !== null) {
     orderW = [[sortBy || "createdAt", order || "DESC"]];
   }
 
@@ -176,7 +176,7 @@ const createCode = async (req, res) => {
 const deleteCode = (req, res, next) => {
   db.Barcode.destroy({ where: { code: req.params.code } })
     .then((data) => {
-      if (data == 1) {
+      if (data === 1) {
         res.send({ message: "Barcode delete successfully" });
       } else {
         res.status(404).send({ message: "Barcode not found" });
@@ -198,7 +198,7 @@ const verify = async (req, res) => {
       return res.status(404).send({ message: "Invalid Barcode" });
     }
 
-    if (!barcode && barcode.status == 1) {
+    if (!barcode && barcode.status === 1) {
       return res.status(404).send({ message: "Barcode already registered" });
     }
     return res.send({ message: "Barcode is available" });
@@ -231,11 +231,11 @@ const report = async (req, res) => {
     let data = [];
     records.forEach((rec) => {
       let result = "";
-      if (rec.status == 0) {
+      if (rec.status === 0) {
         result = "Unassigned";
-      } else if (rec.status == 1) {
+      } else if (rec.status === 1) {
         result = "Assigned";
-      } else if (rec.status == 2) {
+      } else if (rec.status === 2) {
         result = "Scrapped";
       } else {
         result = "Unknown";
