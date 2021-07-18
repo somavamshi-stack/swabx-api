@@ -68,7 +68,6 @@ if (process.env.NODE_ENV === "production") {
       credentials: true,
       exposedHeaders: ["set-cookie"]
     };
-
     let isDomainAllowed = allowlist.indexOf(req.header("Origin")) !== -1;
     if (isDomainAllowed) {
       // Enable CORS for this request
@@ -79,8 +78,6 @@ if (process.env.NODE_ENV === "production") {
 
   app.use(cors(corsOptionsDelegate));
 }
-
-app.use("/api/v1/static", express.static(path.join(__dirname, "../", "assets")));
 
 app.use("/api/v1/accounts", require("./controllers/accounts.controller"));
 
