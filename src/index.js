@@ -13,6 +13,7 @@ const http = require("http");
 const https = require("https");
 const RedisMan = require("./utils/redis_man");
 const nocache = require("nocache");
+const compression = require("compression");
 require("dotenv").config();
 require("./_helpers/db");
 
