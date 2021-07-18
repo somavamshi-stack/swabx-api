@@ -58,24 +58,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// allow cors requests from any origin and with credentials
-const allowlist = ["https://swabx.healthx.global"];
-const corsOptionsDelegate = (req, callback) => {
-  let corsOptions = {
-    origin: false,
-    credentials: true,
-    exposedHeaders: ["set-cookie"]
+if (process.env.NODE_ENV === "production") {
+  // allow cors requests from any origin and with credentials
+  const allowlist = ["https://swabx.healthx.global"];
+  const corsOptionsDelegate = (req, callback) => {
+    let corsOptions = {
+      origin: false,
+      credentials: true,
+      exposedHeaders: ["set-cookie"]
+    };
+
+    let isDomainAllowed = allowlist.indexOf(req.header("Origin")) !== -1;
+    if (isDomainAllowed) {
+      // Enable CORS for this request
+      corsOptions.origin = true;
+    }
+    callback(null, corsOptions);
   };
 
-  let isDomainAllowed = process.env.NODE_ENV === "production" ? allowlist.indexOf(req.header("Origin")) !== -1 : true;
-  if (isDomainAllowed) {
-    // Enable CORS for this request
-    corsOptions.origin = true;
-  }
-  callback(null, corsOptions);
-};
-
-app.use(cors(corsOptionsDelegate));
+  app.use(cors(corsOptionsDelegate));
+}
 
 app.use("/api/v1/static", express.static(path.join(__dirname, "../", "assets")));
 
