@@ -76,7 +76,7 @@ function authenticate(req, res) {
 
 function refreshTokenMW(req, res) {
   const token = req.cookies.refreshToken;
-  if (token === null) {
+  if (token == null) {
     return res.status(401).json({ message: "Token Not Valid" });
   }
   const ipAddress = req.ip;

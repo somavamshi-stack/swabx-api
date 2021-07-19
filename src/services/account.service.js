@@ -247,7 +247,7 @@ async function getAll(custID = null) {
 async function getAllByRole(req, res) {
   let { page, size, token } = req.query;
   let { role } = req.params;
-  if (token === null) token = "";
+  if (token == null) token = "";
   let { limit, offset } = Pagination.getPagination(page, size);
   let accounts, data;
   if (["Customer"].includes(role)) {

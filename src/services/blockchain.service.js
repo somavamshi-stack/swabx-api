@@ -30,7 +30,7 @@ const keepAliveAgent = new http.Agent({
 
 var client;
 async function getConnection() {
-  if (client === null) {
+  if (client == null) {
     client = new MongoClient(MONGO_URL, {
       useUnifiedTopology: true
     });

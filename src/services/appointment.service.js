@@ -8,7 +8,7 @@ async function listAvailableSlots(req, res) {
     const location = await db.Location.findOne({
       where: { id: req.query.locationid }
     });
-    if (location === null) {
+    if (location == null) {
       return res.status(400).send({ _msg: "Location is not identified by System", _status: 400 });
     }
     req.query.customerid = location.accountId;
@@ -29,7 +29,7 @@ async function listAppointments(req, res) {
     const location = await db.Location.findOne({
       where: { id: req.query.locationid }
     });
-    if (location === null) {
+    if (location == null) {
       return res.status(400).send({ _msg: "Location is not identified by System", _status: 400 });
     }
     req.query.customerid = location.accountId;
@@ -120,7 +120,7 @@ async function bookAppointment(req, res) {
     const location = await db.Location.findOne({
       where: { id: req.body.locationid }
     });
-    if (location === null) {
+    if (location == null) {
       return res.status(400).send({ _msg: "Location is not identified by System", _status: 400 });
     }
     req.body.customerid = location.accountId;

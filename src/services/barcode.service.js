@@ -143,7 +143,7 @@ const download = (req, res) => {
 // Retrieve all Barcodes from the database.
 const findAll = (req, res) => {
   let { page, size, token, status, order, sortBy } = req.query;
-  if (token === null) token = "";
+  if (token == null) token = "";
   const { limit, offset } = Pagination.getPagination(page, size);
   status = status !== null ? status.split(",") : [0, 1, 2];
   let orderW = [];
