@@ -55,8 +55,7 @@ function authenticate(req, res) {
       email,
       password,
       ipAddress,
-      userAgent: req.headers["user-agent"],
-      refreshToken: req.session.id
+      userAgent: req.headers["user-agent"]
     })
     .then(({ refreshToken, ...account }) => {
       res.json({

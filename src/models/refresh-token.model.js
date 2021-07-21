@@ -5,7 +5,7 @@ module.exports = model;
 
 function model(sequelize) {
   const attributes = {
-    token: { type: DataTypes.STRING },
+    token: { type: DataTypes.STRING, unique: true },
     expires: { type: DataTypes.DATE },
     created: {
       type: DataTypes.DATE,

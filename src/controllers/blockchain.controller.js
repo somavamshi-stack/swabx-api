@@ -18,8 +18,20 @@ router.post("/upload-diagnosis-report", apiKey, uploadSchema, blockchainService.
 router.post("/diagnosis-report", checkCSRF, authorize([Role.Staff, Role.Patient]), reportSchema, blockchainService.resultPatient);
 router.get("/dashboard/customers/count", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), blockchainService.getCustomerCount);
 router.get("/dashboard/locations/count", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), blockchainService.getLocationCount);
-router.get("/dashboard/breathalyzer-test-stats", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), statisticQSSchema, blockchainService.getTestStats);
-router.get("/dashboard/breathalyzer-usage-stats", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), statisticQSSchema, blockchainService.getAvgStats);
+router.get(
+  "/dashboard/breathalyzer-test-stats",
+  checkCSRF,
+  authorize([Role.Admin, Role.SubAdmin]),
+  statisticQSSchema,
+  blockchainService.getTestStats
+);
+router.get(
+  "/dashboard/breathalyzer-usage-stats",
+  checkCSRF,
+  authorize([Role.Admin, Role.SubAdmin]),
+  statisticQSSchema,
+  blockchainService.getAvgStats
+);
 router.get("/location", checkCSRF, authorize([Role.Staff]), blockchainService.patientList);
 router.post("/checkout", checkCSRF, authorize([Role.Staff]), blockchainService.checkout);
 

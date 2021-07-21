@@ -37,7 +37,7 @@ module.exports = {
   delete: _delete
 };
 
-async function authenticate({ email, password, ipAddress, userAgent, refreshToken }) {
+async function authenticate({ email, password, ipAddress, userAgent }) {
   const account = await db.Account.scope("withHash").findOne({
     where: { email }
   });
@@ -60,7 +60,7 @@ async function authenticate({ email, password, ipAddress, userAgent, refreshToke
 
   // authentication successful so generate jwt and refresh tokens
   const jwtToken = generateJwtToken(account);
-  const rt = generateRefreshToken(account, ipAddress, refreshToken);
+  const rt = generateRefreshToken(account, ipAddress);
 
   // save refresh token
   await rt.save();
@@ -402,10 +402,10 @@ function generateJwtToken(account) {
   });
 }
 
-function generateRefreshToken(account, ipAddress, token) {
+function generateRefreshToken(account, ipAddress) {
   return new db.RefreshToken({
     accountId: account.id,
-    token: token,
+    token: randomTokenString(),
     expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY).getTime(),
     createdByIp: ipAddress
   });
