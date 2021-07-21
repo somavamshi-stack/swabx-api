@@ -25,14 +25,14 @@ const moment = require("moment");
 router.get("/staff", checkCSRF, authorize([Role.Customer]), getAllStaff);
 router.post("/staff", checkCSRF, authorize([Role.Customer]), createStaffSchema, createStaff);
 router.get("/staff/:id", checkCSRF, authorize([Role.Customer]), getStaffById);
-router.put("/staff/:id", checkCSRF, authorize([Role.Customer]), updateStaffSchema, updateStaff);
+router.post("/staff/:id/update", checkCSRF, authorize([Role.Customer]), updateStaffSchema, updateStaff);
 router.delete("/staff/:id", checkCSRF, authorize([Role.Customer]), _deleteStaff);
 
 // Location routes
 
 router.get("/location/:id", checkCSRF, authorize([Role.Customer]), getLocationById);
 router.post("/location/", checkCSRF, authorize([Role.Customer]), createLocation);
-router.put("/location/:id", checkCSRF, authorize([Role.Customer]), updateLocation);
+router.post("/location/:id/update", checkCSRF, authorize([Role.Customer]), updateLocation);
 router.delete("/location/:id", checkCSRF, authorize([Role.Customer]), _deleteLocation);
 router.get("/locations", checkCSRF, authorize([Role.Customer]), getAllLocations);
 router.get("/locations/all", checkCSRF, authorize([Role.Admin, Role.Staff, Role.Patient]), getAllLocationsCust);

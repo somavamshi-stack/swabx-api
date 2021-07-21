@@ -34,7 +34,7 @@ router.get("/", checkCSRF, authorize(Role.Admin), getAll);
 
 router.get("/:id", authorize(), getById);
 router.post("/", authorize([Role.Admin]), createSchema, create);
-router.put("/:id", authorize(), updateSchema, update);
+router.post("/:id/update", authorize(), updateSchema, update);
 
 module.exports = router;
 
@@ -75,7 +75,7 @@ function authenticate(req, res) {
 }
 
 function refreshTokenMW(req, res) {
-  const token = req.cookies.refreshToken;
+  const token = req.cookies.refreshToken || req.body.refreshToken;
   if (token == null) {
     return res.status(401).json({ message: "Token Not Valid" });
   }
