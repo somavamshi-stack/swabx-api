@@ -6,21 +6,22 @@ const Role = require("../_helpers/role");
 const validateRequest = require("../_middleware/validate-request");
 const validateQueryString = validateRequest.validateQueryString;
 const blockchainService = require("../services/blockchain.service");
+const checkCSRF = require("../_middleware/checkCSRF");
 var APIKEYS = ["23423432423", "3453454343"];
 if (process.env.APIKEYS && process.env.APIKEYS.split(",").length > 0) {
   APIKEYS = process.env.APIKEYS.split(",");
 }
 
-router.post("/register-device", authorize([Role.Staff]), registerSchema, blockchainService.register);
-router.post("/scrap-device", authorize([Role.Staff]), scrapDeviceSchema, blockchainService.scrap);
+router.post("/register-device", checkCSRF, authorize([Role.Staff]), registerSchema, blockchainService.register);
+router.post("/scrap-device", checkCSRF, authorize([Role.Staff]), scrapDeviceSchema, blockchainService.scrap);
 router.post("/upload-diagnosis-report", apiKey, uploadSchema, blockchainService.upload);
-router.post("/diagnosis-report", authorize([Role.Staff, Role.Patient]), reportSchema, blockchainService.resultPatient);
-router.get("/dashboard/customers/count", authorize([Role.Admin, Role.SubAdmin]), blockchainService.getCustomerCount);
-router.get("/dashboard/locations/count", authorize([Role.Admin, Role.SubAdmin]), blockchainService.getLocationCount);
-router.get("/dashboard/breathalyzer-test-stats", authorize([Role.Admin, Role.SubAdmin]), statisticQSSchema, blockchainService.getTestStats);
-router.get("/dashboard/breathalyzer-usage-stats", authorize([Role.Admin, Role.SubAdmin]), statisticQSSchema, blockchainService.getAvgStats);
-router.get("/location", authorize([Role.Staff]), blockchainService.patientList);
-router.post("/checkout", authorize([Role.Staff]), blockchainService.checkout);
+router.post("/diagnosis-report", checkCSRF, authorize([Role.Staff, Role.Patient]), reportSchema, blockchainService.resultPatient);
+router.get("/dashboard/customers/count", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), blockchainService.getCustomerCount);
+router.get("/dashboard/locations/count", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), blockchainService.getLocationCount);
+router.get("/dashboard/breathalyzer-test-stats", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), statisticQSSchema, blockchainService.getTestStats);
+router.get("/dashboard/breathalyzer-usage-stats", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), statisticQSSchema, blockchainService.getAvgStats);
+router.get("/location", checkCSRF, authorize([Role.Staff]), blockchainService.patientList);
+router.post("/checkout", checkCSRF, authorize([Role.Staff]), blockchainService.checkout);
 
 module.exports = router;
 

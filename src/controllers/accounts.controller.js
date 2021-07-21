@@ -5,7 +5,6 @@ const validateRequest = require("../_middleware/validate-request");
 const authorize = require("../_middleware/authorize");
 const Role = require("../_helpers/role");
 const accountService = require("../services/account.service");
-const timeParser = require("parse-duration");
 const moment = require("moment");
 const NAME_REGEX = /^[a-zA-Z0-9_ ]{4,25}$/;
 const NAME_RULE = {
@@ -17,21 +16,21 @@ const PASSWORD_RULE = {
   message:
     "Password must contain \n\t*. at least 1 lowercase alphabetical character.\n\t*. at least 1 uppercase alphabetical character.\n\t*. at least 1 numeric character.\n\t*. at least one special character !@#$%^&\n\t*. Mininum of 8 characters"
 };
-const REFRESH_TOKEN_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("3h");
+const checkCSRF = require("../_middleware/checkCSRF");
 
 // routes
 router.post("/authenticate", authenticateSchema, authenticate);
-router.post("/refresh-token", refreshTokenMW);
-router.post("/revoke-token", authorize(), revokeTokenSchema, revokeToken);
+router.post("/refresh-token", checkCSRF, refreshTokenMW);
+router.post("/revoke-token", checkCSRF, authorize(), revokeTokenSchema, revokeToken);
 router.post("/register", registerSchema, register);
 router.post("/verify-email", verifyEmailSchema, verifyEmail);
-router.post("/change-password", authorize(), changePasswordSchema, changePassword);
+router.post("/change-password", checkCSRF, authorize(), changePasswordSchema, changePassword);
 router.post("/forgot-password", forgotPasswordSchema, forgotPassword);
 router.post("/validate-reset-token", validateResetTokenSchema, validateResetToken);
 
 router.post("/reset-password", resetPasswordSchema, resetPassword);
-router.get("/role/:role", authorize(Role.Admin), getAllByRole);
-router.get("/", authorize(Role.Admin), getAll);
+router.get("/role/:role", checkCSRF, authorize(Role.Admin), getAllByRole);
+router.get("/", checkCSRF, authorize(Role.Admin), getAll);
 
 router.get("/:id", authorize(), getById);
 router.post("/", authorize([Role.Admin]), createSchema, create);
@@ -46,19 +45,20 @@ function authenticateSchema(req, res, next) {
   });
   validateRequest(req, next, schema);
 }
-
+const uuid = require("uuid");
 function authenticate(req, res) {
   const { email, password } = req.body;
   const ipAddress = req.ip;
+  req.session.csrfToken = uuid.v4();
   accountService
     .authenticate({
       email,
       password,
       ipAddress,
-      userAgent: req.headers["user-agent"]
+      userAgent: req.headers["user-agent"],
+      refreshToken: req.session.id
     })
     .then(({ refreshToken, ...account }) => {
-      setTokenCookie(res, refreshToken);
       res.json({
         id: account.id,
         name: account.name,
@@ -66,7 +66,8 @@ function authenticate(req, res) {
         role: account.role,
         isVerified: account.isVerified,
         jwtToken: account.jwtToken,
-        refreshToken
+        refreshToken,
+        csrfToken: req.session.csrfToken
       });
     })
     .catch((err) => {
@@ -83,7 +84,6 @@ function refreshTokenMW(req, res) {
   accountService
     .refreshToken({ token, ipAddress })
     .then(({ refreshToken, ...account }) => {
-      setTokenCookie(res, refreshToken);
       res.json({
         id: account.id,
         name: account.name,
@@ -91,10 +91,12 @@ function refreshTokenMW(req, res) {
         role: account.role,
         isVerified: account.isVerified,
         jwtToken: account.jwtToken,
-        refreshToken
+        refreshToken,
+        csrfToken: req.session.csrfToken
       });
     })
     .catch((err) => {
+      console.error(err);
       res.status(500).send({ message: err.message });
     });
 }
@@ -314,7 +316,7 @@ function createSchema(req, res, next) {
 }
 
 function create(req, res) {
-  req.body.activationDt = moment(new Date().getTime()).format("YYYY-MM-DD hh:mm:ss");
+  req.body.activationDt = new Date().getTime();
   req.body.expiryDt = moment().add(10, "y").format("YYYY-MM-DD hh:mm:ss");
   accountService
     .create(req.body, req.user.id)
@@ -359,15 +361,4 @@ function update(req, res) {
     .catch((err) => {
       res.status(500).send({ message: err.message });
     });
-}
-
-// helper functions
-function setTokenCookie(res, token) {
-  // create cookie with refresh token that expires in 7 days
-  const cookieOptions = {
-    httpOnly: process.env.NODE_ENV === "production",
-    secure: process.env.NODE_ENV === "production",
-    expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY)
-  };
-  res.cookie("refreshToken", token, cookieOptions);
 }

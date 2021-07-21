@@ -13,9 +13,9 @@ const timeParser = require("parse-duration");
 const RedisMan = require("../utils/redis_man");
 const moment = require("moment");
 const OTP_EXPIRY_TIME = (process.env.OTP_EXPIRY_TIME && timeParser(process.env.OTP_EXPIRY_TIME)) || timeParser("5m");
-const REFRESH_TOKEN_EXPIRY = timeParser("3d"); // (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("2h");
-const TOKEN_EXPIRY = "1h"; // process.env.JWT_TOKEN_EXPIRY || "1h";
-const CLIENT_NAME = process.env.CLIENT_NAME || "TracieX";
+const REFRESH_TOKEN_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY && timeParser(process.env.REFRESH_TOKEN_EXPIRY)) || timeParser("2h");
+const TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY || "1h";
+const CLIENT_NAME = process.env.CLIENT_NAME || "SwabX";
 const PRIV_KEY = fs.readFileSync(path.join(__dirname, "../..", "/keys/id_rsa_priv.pem"), "utf8");
 const MAX_ALLOWED_OTP = (process.env.MAX_ALLOWED_OTP && Number(process.env.MAX_ALLOWED_OTP)) || 5;
 
@@ -37,7 +37,7 @@ module.exports = {
   delete: _delete
 };
 
-async function authenticate({ email, password, ipAddress, userAgent }) {
+async function authenticate({ email, password, ipAddress, userAgent, refreshToken }) {
   const account = await db.Account.scope("withHash").findOne({
     where: { email }
   });
@@ -60,7 +60,7 @@ async function authenticate({ email, password, ipAddress, userAgent }) {
 
   // authentication successful so generate jwt and refresh tokens
   const jwtToken = generateJwtToken(account);
-  const rt = generateRefreshToken(account, ipAddress);
+  const rt = generateRefreshToken(account, ipAddress, refreshToken);
 
   // save refresh token
   await rt.save();
@@ -76,7 +76,6 @@ async function authenticate({ email, password, ipAddress, userAgent }) {
 async function refreshToken({ token, ipAddress }) {
   const rt = await getRefreshToken(token);
   const account = await rt.getAccount();
-
   // replace old refresh token with a new one and save
   const newRefreshToken = generateRefreshToken(account, ipAddress);
   rt.revoked = Date.now();
@@ -112,10 +111,14 @@ function register(params) {
     if (info) {
       // send already registered error in email to prevent account enumeration
       resolve(false);
-      return await sendAlreadyRegisteredEmail(info);
+      try {
+        return await sendAlreadyRegisteredEmail(info);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
-    params.activationDt = moment(new Date().getTime()).format("YYYY-MM-DD hh:mm:ss");
+    params.activationDt = new Date().getTime();
     params.expiryDt = moment().add(10, "y").format("YYYY-MM-DD hh:mm:ss");
 
     // create account object
@@ -138,7 +141,11 @@ function register(params) {
     await account.save();
     resolve(true);
     // send email
-    sendVerificationEmail(account);
+    try {
+      await sendVerificationEmail(account);
+    } catch (error) {
+      console.error(error);
+    }
   });
 }
 
@@ -168,7 +175,7 @@ function forgotPassword({ email }) {
   return new Promise(async (resolve, reject) => {
     const account = await db.Account.findOne({ where: { email } });
     // always return ok response to prevent email enumeration
-    if (!account) return reject("We're sorry. We weren't able to identify you, given the information provided.");
+    if (!account) return reject("We're sorry. We weren't able to identify you given the information provided.");
 
     account.resetToken = generateOTP();
     account.resetTokenExpires = new Date(Date.now() + OTP_EXPIRY_TIME);
@@ -395,11 +402,11 @@ function generateJwtToken(account) {
   });
 }
 
-function generateRefreshToken(account, ipAddress) {
+function generateRefreshToken(account, ipAddress, token) {
   return new db.RefreshToken({
     accountId: account.id,
-    token: randomTokenString(),
-    expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
+    token: token,
+    expires: new Date(Date.now() + REFRESH_TOKEN_EXPIRY).getTime(),
     createdByIp: ipAddress
   });
 }
@@ -462,25 +469,21 @@ async function sendOnboardEmail(account, password) {
 }
 
 async function sendVerificationEmail(account) {
-  try {
-    const verifyUrl =
-      account.role === Role.Admin ? `${API_URL}/accounts/verify-email?token=${account.verificationToken}` : `${account.verificationToken}`;
-    const activationLinkValidity = 3;
+  const verifyUrl =
+    account.role === Role.Admin ? `${API_URL}/accounts/verify-email?token=${account.verificationToken}` : `${account.verificationToken}`;
+  const activationLinkValidity = 3;
 
-    return await sendEmail(
-      account.email,
-      account.role === Role.Admin ? "welcome.html" : "verification-code.html",
-      {
-        activationLink: verifyUrl,
-        name: account.name,
-        loginId: account.email,
-        activationLinkValidity: activationLinkValidity
-      },
-      `Welcome to ${CLIENT_NAME}`
-    );
-  } catch (error) {
-    console.error(error);
-  }
+  return await sendEmail(
+    account.email,
+    account.role === Role.Admin ? "welcome.html" : "verification-code.html",
+    {
+      activationLink: verifyUrl,
+      name: account.name,
+      loginId: account.email,
+      activationLinkValidity: activationLinkValidity
+    },
+    `Welcome to ${CLIENT_NAME}`
+  );
 }
 
 async function sendAlreadyRegisteredEmail(account) {

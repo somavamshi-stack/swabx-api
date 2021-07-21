@@ -43,7 +43,7 @@ async function listAppointments(req, res) {
           let patient = await db.Account.findOne({
             where: { id: rec.patientid }
           });
-          if (patient !== null) {
+          if (patient != null) {
             rec.patient = patient.name;
           } else {
             rec.patient = "Anonymous";
@@ -98,7 +98,7 @@ async function myUpcomingAppointment(req, res) {
       const location = await db.Location.findOne({
         where: { id: response.body.data.locationid }
       });
-      if (location !== null) {
+      if (location != null) {
         delete response.body.data.customerid;
         delete response.body.data.patientid;
         delete response.body.data.s_id;

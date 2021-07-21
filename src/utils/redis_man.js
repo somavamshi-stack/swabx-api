@@ -35,7 +35,7 @@ module.exports = {
     }
     return new Promise((resolve, reject) => {
       const conn = redisPool[key];
-      if (conn && conn.redis !== null && conn.status === 1) {
+      if (conn && conn.redis != null && conn.status === 1) {
         resolve(conn.redis);
       } else {
         conn.redis = new RedisStore(conn.config);

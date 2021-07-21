@@ -3,20 +3,23 @@ const helmet = require("helmet");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const redis = require("redis");
 const marked = require("marked");
 const cors = require("cors");
 const fs = require("fs");
 const tls = require("tls");
 const path = require("path");
+const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const http = require("http");
 const https = require("https");
 const RedisMan = require("./utils/redis_man");
 const nocache = require("nocache");
-const compression = require("compression");
 require("dotenv").config();
 require("./_helpers/db");
-
+const connectRedis = require("connect-redis");
+const session = require("express-session");
+const RedisStore = connectRedis(session);
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 6000 // limit each IP to 6000 requests per windowMs
@@ -30,8 +33,25 @@ const redisConfig = {
 RedisMan.init({
   config: redisConfig
 });
+var client = redis.createClient(redisConfig);
 
 const app = express();
+
+app.use(
+  session({
+    store: new RedisStore({ ...redisConfig, client: client }),
+    name: "session",
+    secret: process.env.SECRET,
+    cookie: {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000 // week in seconds
+    },
+    resave: true,
+    saveUninitialized: true,
+    rolling: true
+  })
+);
+
 app.use(limiter);
 app.set("trust proxy", 1);
 app.set("etag", false); // turning off etag
@@ -59,35 +79,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-if (process.env.NODE_ENV === "production") {
-  // allow cors requests from any origin and with credentials
-  const allowlist = ["https://swabx.healthx.global"];
-  const corsOptionsDelegate = (req, callback) => {
-    let corsOptions = {
-      origin: false,
-      credentials: true,
-      exposedHeaders: ["set-cookie"]
-    };
-    let isDomainAllowed = allowlist.indexOf(req.header("Origin")) !== -1;
-    if (isDomainAllowed) {
-      // Enable CORS for this request
-      corsOptions.origin = true;
-    }
-    callback(null, corsOptions);
+// allow cors requests from any origin and with credentials
+const allowlist = ["https://swabx.healthx.global"];
+const corsOptionsDelegate = (req, callback) => {
+  let corsOptions = {
+    origin: false,
+    credentials: true,
+    exposedHeaders: ["set-cookie"]
   };
 
-  app.use(cors(corsOptionsDelegate));
-}
+  let isDomainAllowed = process.env.NODE_ENV === "production" ? allowlist.indexOf(req.header("Origin")) !== -1 : true;
+  if (isDomainAllowed) {
+    // Enable CORS for this request
+    corsOptions.origin = true;
+  }
+  callback(null, corsOptions);
+};
 
-app.use("/api/v1/accounts", require("./controllers/accounts.controller"));
+app.use(cors(corsOptionsDelegate));
 
-app.use("/api/v1/customer", require("./controllers/customer.controller"));
-
-app.use("/api/v1/barcode", require("./controllers/barcode.controller"));
-
-app.use("/api/v1/bc", require("./controllers/blockchain.controller"));
-
-app.use("/api/v1/appointment", require("./controllers/appointment.controller"));
+app.use("/api/v1", require("./controllers"));
 
 // global error handler
 

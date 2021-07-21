@@ -57,7 +57,7 @@ function sendRequest(path, payload) {
       time: process.env.NODE_ENV !== "production"
     };
     request(options, function (err, resp, body) {
-      if (err !== null) {
+      if (err != null) {
         logger.error("Exception", err);
         return resolve({
           statusCode: 500,

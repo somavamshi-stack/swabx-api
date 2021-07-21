@@ -6,15 +6,16 @@ const Role = require("../_helpers/role");
 const validateRequest = require("../_middleware/validate-request");
 const validateQueryString = validateRequest.validateQueryString;
 const appointmentService = require("../services/appointment.service");
+const checkCSRF = require("../_middleware/checkCSRF");
 
-router.get("/location-appointments", authorize([Role.Staff]), listSchema, appointmentService.listAppointments);
+router.get("/location-appointments", checkCSRF, authorize([Role.Staff]), listSchema, appointmentService.listAppointments);
 
-router.get("/check-slots", authorize([Role.Patient]), listSchema, appointmentService.listAvailableSlots);
-router.get("/my-appointments", authorize([Role.Patient]), appointmentService.myAppointments);
-router.get("/my-upcoming-appointment", authorize([Role.Patient]), appointmentService.myUpcomingAppointment);
-router.post("/book-appointment", authorize([Role.Patient]), bookSchema, appointmentService.bookAppointment);
-router.post("/cancel-appointment", authorize([Role.Patient]), aidSchema, appointmentService.cancelAppointment);
-router.post("/update-status", authorize([Role.Staff]), aidSchema, appointmentService.updateAppointmentStatus);
+router.get("/check-slots", checkCSRF, authorize([Role.Patient]), listSchema, appointmentService.listAvailableSlots);
+router.get("/my-appointments", checkCSRF, authorize([Role.Patient]), appointmentService.myAppointments);
+router.get("/my-upcoming-appointment", checkCSRF, authorize([Role.Patient]), appointmentService.myUpcomingAppointment);
+router.post("/book-appointment", checkCSRF, authorize([Role.Patient]), bookSchema, appointmentService.bookAppointment);
+router.post("/cancel-appointment", checkCSRF, authorize([Role.Patient]), aidSchema, appointmentService.cancelAppointment);
+router.post("/update-status", checkCSRF, authorize([Role.Staff]), aidSchema, appointmentService.updateAppointmentStatus);
 
 module.exports = router;
 
