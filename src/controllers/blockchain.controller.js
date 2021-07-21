@@ -7,14 +7,10 @@ const validateRequest = require("../_middleware/validate-request");
 const validateQueryString = validateRequest.validateQueryString;
 const blockchainService = require("../services/blockchain.service");
 const checkCSRF = require("../_middleware/checkCSRF");
-var APIKEYS = ["23423432423", "3453454343"];
-if (process.env.APIKEYS && process.env.APIKEYS.split(",").length > 0) {
-  APIKEYS = process.env.APIKEYS.split(",");
-}
 
 router.post("/register-device", checkCSRF, authorize([Role.Staff]), registerSchema, blockchainService.register);
 router.post("/scrap-device", checkCSRF, authorize([Role.Staff]), scrapDeviceSchema, blockchainService.scrap);
-router.post("/upload-diagnosis-report", apiKey, uploadSchema, blockchainService.upload);
+router.post("/upload-diagnosis-report", checkCSRF, authorize([Role.Staff]), uploadSchema, blockchainService.upload);
 router.post("/diagnosis-report", checkCSRF, authorize([Role.Staff, Role.Patient]), reportSchema, blockchainService.resultPatient);
 router.get("/dashboard/customers/count", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), blockchainService.getCustomerCount);
 router.get("/dashboard/locations/count", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), blockchainService.getLocationCount);
@@ -81,11 +77,4 @@ function uploadSchema(req, res, next) {
     diagnosis: Joi.string().required().valid("Positive", "Negative", "Invalid").empty("")
   });
   validateRequest(req, next, schema);
-}
-
-function apiKey(req, res, next) {
-  if (!APIKEYS.includes(req.body.key)) {
-    return res.status(401).send({ message: "Unauthorized Access" });
-  }
-  next();
 }

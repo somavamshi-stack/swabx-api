@@ -11,7 +11,7 @@ const transport = nodemailer.createTransport(config.smtpOptions);
 module.exports = sendMailTemplate;
 
 function sendMailTemplate(to, templateName, context, subject) {
-  context.customer = process.env.CLIENT_NAME || "TracieX";
+  context.customer = process.env.CLIENT_NAME || "SwabX";
   context.PUBLIC_URL = "https://swabx.healthx.global";
   let mailOptions;
   return new Promise(function (resolve, reject) {
