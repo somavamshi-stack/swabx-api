@@ -22,7 +22,7 @@ router.post("/create", setUUID, barcodeService.createCode);
 router.post("/upload", checkCSRF, authorize([Role.SubAdmin]), setUUID, upload.single("file"), barcodeService.upload);
 router.get("/export", checkCSRF, authorize([Role.Admin, Role.SubAdmin]), barcodeService.download);
 router.get("/report", checkCSRF, authorize([Role.Admin, Role.Customer]), qsSchema, barcodeService.report);
-router.delete("/:code", checkCSRF, authorize([Role.SubAdmin]), barcodeService.deleteCode);
+router.post("/:code/delete", checkCSRF, authorize([Role.SubAdmin]), barcodeService.deleteCode);
 
 module.exports = router;
 

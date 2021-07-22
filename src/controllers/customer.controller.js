@@ -26,14 +26,14 @@ router.get("/staff", checkCSRF, authorize([Role.Customer]), getAllStaff);
 router.post("/staff", checkCSRF, authorize([Role.Customer]), createStaffSchema, createStaff);
 router.get("/staff/:id", checkCSRF, authorize([Role.Customer]), getStaffById);
 router.post("/staff/:id/update", checkCSRF, authorize([Role.Customer]), updateStaffSchema, updateStaff);
-router.delete("/staff/:id", checkCSRF, authorize([Role.Customer]), _deleteStaff);
+router.post("/staff/:id/delete", checkCSRF, authorize([Role.Customer]), _deleteStaff);
 
 // Location routes
 
 router.get("/location/:id", checkCSRF, authorize([Role.Customer]), getLocationById);
 router.post("/location/", checkCSRF, authorize([Role.Customer]), createLocation);
 router.post("/location/:id/update", checkCSRF, authorize([Role.Customer]), updateLocation);
-router.delete("/location/:id", checkCSRF, authorize([Role.Customer]), _deleteLocation);
+router.post("/location/:id/delete", checkCSRF, authorize([Role.Customer]), _deleteLocation);
 router.get("/locations", checkCSRF, authorize([Role.Customer]), getAllLocations);
 router.get("/locations/all", checkCSRF, authorize([Role.Admin, Role.Staff, Role.Patient]), getAllLocationsCust);
 router.get("/usage-report", checkCSRF, authorize([Role.Customer]), barcodeService.customerUsageReport);
