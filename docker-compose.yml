@@ -33,7 +33,7 @@ services:
             - vpcbr
 
     appointment:
-        image: swabx/appointment:latest
+        image: blockchain.azurecr.io/appointment_scheduler
         container_name: appointment
         environment:
             NODE_ENV: production
@@ -48,15 +48,12 @@ services:
             - vpcbr
         
     api:
-        image: swabx/api:latest
+        image: blockchain.azurecr.io/breathalyzer_api:swabx
         container_name: api
         ports: 
             - "443:443"
         networks:
             - vpcbr
-        build:
-            context: .
-            dockerfile: Dockerfile
         links:
             - mariadb
         depends_on:
