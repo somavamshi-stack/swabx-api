@@ -28,10 +28,25 @@ services:
         restart: always
         environment:
             MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: example
+            MONGO_INITDB_ROOT_PASSWORD: HealthX!Chain123Root
         networks:
             - vpcbr
 
+    appointment:
+        image: swabx/appointment:latest
+        container_name: appointment
+        environment:
+            NODE_ENV: production
+            loglevel: all
+            MYSQL_DIALECT: mysql
+            MYSQL_HOST: mariadb
+            MYSQL_PORT: 3306
+            MYSQL_DATABASE: swabx
+            MYSQL_USER: swabx
+            MYSQL_PASSWORD: HealthX!Chain123BLR
+        networks:
+            - vpcbr
+        
     api:
         image: swabx/api:latest
         container_name: api
@@ -56,6 +71,7 @@ services:
             MYSQL_USER: swabx
             MYSQL_PASSWORD: HealthX!Chain123BLR
             SECRET: 551531dca26542b188cb3803ab4de7b9
+            AS_URL: http://appointment:8985/api/v1.0.0
             BC_URL: http://10.2.0.4:8080/api/v1
             MONGO_URL: mongodb://localhost:2222
             MONGO_DATABASE: HealthX_1
