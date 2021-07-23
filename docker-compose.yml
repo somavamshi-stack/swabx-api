@@ -38,7 +38,7 @@ services:
         environment:
             NODE_ENV: production
             loglevel: all
-            MYSQL_DIALECT: mysql
+            MYSQL_DIALECT: mariadb
             MYSQL_HOST: mariadb
             MYSQL_PORT: 3306
             MYSQL_DATABASE: swabx
