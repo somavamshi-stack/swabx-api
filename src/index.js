@@ -80,7 +80,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 // allow cors requests from any origin and with credentials
-const allowlist = ["https://swabx.healthx.global"];
+const allowlist = ["https://swabx.healthx.global", "https://49.205.218.104:4444"];
 const corsOptionsDelegate = (req, callback) => {
   let corsOptions = {
     origin: false,
@@ -117,7 +117,7 @@ app.use((err, req, res, next) => {
 
 // start server
 tls.CLIENT_RENEG_LIMIT = 0;
-var server;
+var server, port;
 if (process.env.NODE_ENV === "production") {
   const privateKey = fs.readFileSync(path.join(__dirname, "privkey.pem"), "utf8");
   const certificate = fs.readFileSync(path.join(__dirname, "fullchain.pem"), "utf8");
